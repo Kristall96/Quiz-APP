@@ -1,44 +1,30 @@
+const { serveFiles } = require("./utils");
 const http = require("http");
-const fs = require("fs");
 const path = require("path");
+const url = require("url");
 
 const PORT = 3000;
 const URL = "http://localhost:";
 
 const server = http.createServer((req, res) => {
-  const basePath = path.join(__dirname, "../");
+  const parsedUrl = url.parse(req.url, true); //Parse the url and query params
+  const query = (parsedUrl = parsedUrl.query);
 
-  const getMimeType = (ext) => {
-    const mimeTypes = {
-      ".html": "text/html",
-      ".css": "text/css",
-      ".javascript": "text/javascript",
-      ".png": "image/png",
-      ".jpg": "image/jpg",
-    };
-    return mimeTypes || "application/octet-stream";
-  };
-
-  const serveFiles = (filepath, res) => {
-    const ext = path.extname(filepath);
-
-    fs.readFile(filepath, (error, data) => {
-      if (error) {
-        res.writeHead(404, { "Content-Type": "text/plain" });
-        res.end(`Error loading the page`);
-      } else {
-        res.writeHead(200, { "Content-Type": getMimeType(ext) });
-        res.end(data);
-      }
-    });
-  };
-
-  const filePath = path.join(
-    basePath,
-    req.url === "/" ? "index.html" : req.url.slice(1)
-  );
-  serveFiles(filePath, res);
+  if (parsedUrl.pathname === "/") {
+    serveFiles(path.join(__dirname, "index.html"), res);
+  } else if (parsedUrl.pathname === "/about") {
+    serveFiles(path.join(__dirname, "about.html"), res);
+  } else if (parsedUrl.pathname === "/contact") {
+    serveFiles(path.join(__dirname, "contact.html"), res);
+  } else if (parsedUrl.pathname === "/search") {
+    const searchTerm = query.q || "No query provided";
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end(`Search Term: ${searchTerm}`);
+  } else {
+    serveFiles(path.join(__dirname, "404.html"), res);
+  }
 });
+
 server.listen(PORT, () => {
   console.log(
     `Your Server is Running on PORT: ${PORT}, with the URL: ${URL}${PORT}`
