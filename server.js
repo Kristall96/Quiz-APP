@@ -1,6 +1,6 @@
 const http = require("http");
 const mongoose = require("mongoose");
-const userRoute = require("../routes/userRoutes");
+const userRoute = require("./routes/userRoutes");
 
 const uri =
   "mongodb+srv://erkandev:erkan96@cluster0.1dt2n.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
