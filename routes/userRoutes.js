@@ -1,25 +1,16 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
-// Load environment variables
 require("dotenv").config();
+
 const jwtSecret = process.env.JWT_SECRET;
 
-console.log("JWT_SECRET:", jwtSecret);
-
-async function userRoutes(req, res) {
+function userRoutes(req, res) {
+  // Register Functionality
   if (req.url === "/register" && req.method === "POST") {
-    let body = "";
-
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-
-    req.on("end", async () => {
-      try {
-        const { username, email, password, address, postcode, phone, role } =
-          JSON.parse(body);
+    return parseRequestBody(req)
+      .then((userData) => {
+        const { username, email, password } = userData;
 
         if (!username || !email || !password) {
           res.writeHead(400, { "Content-Type": "application/json" });
@@ -28,86 +19,92 @@ async function userRoutes(req, res) {
               error: "Username, email, and password are required!",
             })
           );
-          return;
+          return Promise.reject(); // Stop further execution
         }
 
-        const duplicate = await User.findOne({
-          $or: [{ username }, { email }],
-        });
+        return User.findOne({ $or: [{ username }, { email }] }).then(
+          (duplicate) => {
+            if (duplicate) {
+              const errorMessage =
+                duplicate.username === username
+                  ? "This username already exists."
+                  : "This email already exists.";
+              res.writeHead(409, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ error: errorMessage }));
+              return Promise.reject(); // Stop further execution
+            }
 
-        if (duplicate) {
-          const errorMessage =
-            duplicate.username === username
-              ? "This username already exists."
-              : "This email already exists.";
-          res.writeHead(409, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ error: errorMessage }));
-          return;
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
+            return bcrypt.hash(password, 10);
+          }
+        );
+      })
+      .then((hashedPassword) => {
         const newUser = new User({
-          username,
-          email,
+          username: userData.username,
+          email: userData.email,
           password: hashedPassword,
-          address,
-          postcode,
-          phone,
-          role: role || "user",
+          address: userData.address,
+          postcode: userData.postcode,
+          phone: userData.phone,
+          role: userData.role || "user",
         });
 
-        await newUser.save();
-
+        return newUser.save();
+      })
+      .then(() => {
         res.writeHead(201, { "Content-Type": "application/json" });
         res.end(
           JSON.stringify({ message: "Account registered successfully!" })
         );
-      } catch (error) {
-        console.error("Error during registration:", error);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(
-          JSON.stringify({
-            error: "An unexpected error occurred. Please try again.",
-          })
-        );
-      }
-    });
-
-    return true;
+      })
+      .catch((error) => {
+        console.error("Error during registration:", error.message);
+        if (!res.writableEnded) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "An unexpected error occurred. Please try again.",
+            })
+          );
+        }
+      });
   }
 
+  // Login Functionality
   if (req.url === "/login" && req.method === "POST") {
-    let body = "";
-
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
-
-    req.on("end", async () => {
-      try {
-        const { email, password } = JSON.parse(body);
+    return parseRequestBody(req)
+      .then((loginData) => {
+        const { email, password } = loginData;
 
         if (!email || !password) {
           res.writeHead(400, { "Content-Type": "application/json" });
           res.end(
             JSON.stringify({ error: "Email and password are required!" })
           );
-          return;
+          return Promise.reject(); // Stop further execution
         }
 
-        const user = await User.findOne({ email });
-
+        return User.findOne({ email });
+      })
+      .then((user) => {
         if (!user) {
           res.writeHead(401, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Invalid email or password" }));
-          return;
+          return Promise.reject(); // Stop further execution
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        return bcrypt
+          .compare(loginData.password, user.password)
+          .then((isMatch) => ({
+            user,
+            isMatch,
+          }));
+      })
+      .then(({ user, isMatch }) => {
         if (!isMatch) {
           res.writeHead(401, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Invalid email or password" }));
-          return;
+          return Promise.reject(); // Stop further execution
         }
 
         const token = jwt.sign(
@@ -118,20 +115,21 @@ async function userRoutes(req, res) {
 
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ message: "Login successful", token }));
-      } catch (error) {
-        console.error("Error during login", error);
-        res.writeHead(500, { "Content-Type": "application/json" });
-        res.end(
-          JSON.stringify({
-            error: "An unexpected error occurred. Please try again.",
-          })
-        );
-      }
-    });
-
-    return true;
+      })
+      .catch((error) => {
+        console.error("Error during login:", error.message);
+        if (!res.writableEnded) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              error: "An unexpected error occurred. Please try again.",
+            })
+          );
+        }
+      });
   }
 
+  // Fallback for unhandled routes
   return false;
 }
 
