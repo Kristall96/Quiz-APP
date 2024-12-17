@@ -1,30 +1,19 @@
 const http = require("http");
-const mongoose = require("mongoose");
-const userRoute = require("./routes/userRoutes");
-// Database Uri
-const uri =
-  "mongodb+srv://erkandev:erkan96@cluster0.1dt2n.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-// Databse connection
-mongoose
-  .connect(uri)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.error("Database connection error:", err);
-  });
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const authHandler = require("./routes/auth");
+const User = require("./models/User");
 
-// Creating server
-const server = http.createServer(async (req, res) => {
-  // User Reg/Login Module
-  const handled = await userRoute(req, res);
-  // Send 404 only if the route was not handled
-  if (!handled) {
-    res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Route not found" }));
-  }
+dotenv.config();
+connectDB();
+
+const PORT = process.env.PORT || 3000;
+
+const server = http.createServer((req, res) => {
+  // Delegate all requests to the authHandler
+  authHandler(req, res);
 });
-// Start the server on Port 3000
-server.listen(3000, () => {
-  console.log("Your server is working on port 3000!");
+
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
