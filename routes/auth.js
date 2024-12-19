@@ -4,6 +4,7 @@ const User = require("../models/User");
 require("dotenv").config();
 
 // Helper function to parse JSON request body
+// resolved naming issue on the helper function
 const parseRequestBody = (req) => {
   return new Promise((resolve, reject) => {
     let body = "";
