@@ -1,46 +1,45 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/User");
+const User = require("./models/User");
 
 const parseRequestBody = (req) => {
-  return new Promise((resolve, rejects) => {
-    let body = "";
+  let body = "";
+  return new Promise((resolve, reject) => {
     req.on("data", (chunks) => {
-      body = body + chunks;
+      body += chunks.toString();
     });
     req.on("end", () => {
       try {
         resolve(JSON.parse(body));
-      } catch (error) {
-        rejects("Invalid JSON");
+      } catch {
+        reject({ status: 400, message: "Invalid JSON" });
       }
     });
   });
 };
 
-const authHandler = (req, res) => {
+const auth = (req, res) => {
   res.setHeader("Content-Type", "application/json");
+  if (req.url === "/register" && req.method === "POST") {
+    const { username, email, password } = body;
 
-  if (req.url === "/register" && req.url === "POST") {
-    let username, email, password;
     parseRequestBody(req)
       .then((body) => {
-        ({ username, email, password } = body);
         if (!username || !email || !password) {
           return Promise.reject({
             status: 400,
             message: "All fields are required",
           });
         }
-
         return User.findOne({ $or: [{ username }, { email }] });
       })
       .then((existingUser) => {
         if (existingUser) {
           return Promise.reject({
             status: 400,
-            message: "Username or Email already exists",
+            message: "Username or email already exist",
           });
         }
+
         return bcrypt.hash(password, 10);
       })
       .then((hashedPassword) => {
@@ -52,15 +51,15 @@ const authHandler = (req, res) => {
         return newUser.save();
       })
       .then(() => {
-        res.writeHead(201);
-        res.end(JSON.stringify({ message: "User registered successfully" }));
+        res.writeHead(201),
+          res.end(JSON.stringify({ message: "Account succesfully created!" }));
       })
       .catch((err) => {
         if (!res.writableEnded) {
-          res.writeHead(err.status || 500);
-          res.end(
-            JSON.stringify({ error: err.message || "Internal Server Error" })
-          );
+          res.writeHead(err.status || 500),
+            res.end(
+              JSON.stringify({ error: err.status || "Internal server error" })
+            );
         }
       });
   }

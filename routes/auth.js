@@ -4,7 +4,6 @@ const User = require("../models/User");
 require("dotenv").config();
 
 // Helper function to parse JSON request body
-// resolved naming issue on the helper function
 const parseRequestBody = (req) => {
   return new Promise((resolve, reject) => {
     let body = "";
@@ -15,7 +14,7 @@ const parseRequestBody = (req) => {
       try {
         resolve(JSON.parse(body));
       } catch (err) {
-        reject("Invalid JSON");
+        reject({ error: err.status || "Invalid JSON" });
       }
     });
   });
@@ -23,39 +22,31 @@ const parseRequestBody = (req) => {
 
 const authHandler = (req, res) => {
   res.setHeader("Content-Type", "application/json");
-
-  // REGISTER
   if (req.url === "/register" && req.method === "POST") {
-    let username, email, password; // Declare variables at the top to make them accessible
+    let username, email, password;
 
     parseRequestBody(req)
       .then((body) => {
-        // Destructure variables from the parsed body
         ({ username, email, password } = body);
-
         if (!username || !email || !password) {
           return Promise.reject({
             status: 400,
             message: "All fields are required",
           });
         }
-
-        // Check for existing user
         return User.findOne({ $or: [{ username }, { email }] });
       })
       .then((existingUser) => {
         if (existingUser) {
           return Promise.reject({
             status: 400,
-            message: "Username or Email already exists",
+            message: "Username or email already exist",
           });
         }
 
-        // Hash the password
         return bcrypt.hash(password, 10);
       })
       .then((hashedPassword) => {
-        // Use the variables stored earlier
         const newUser = new User({
           username,
           email,
@@ -64,15 +55,21 @@ const authHandler = (req, res) => {
         return newUser.save();
       })
       .then(() => {
-        res.writeHead(201);
-        res.end(JSON.stringify({ message: "User registered successfully" }));
+        res.writeHead(201),
+          res.end(JSON.stringify({ message: "Account succesfully created!" }));
       })
       .catch((err) => {
         if (!res.writableEnded) {
-          res.writeHead(err.status || 500);
-          res.end(
-            JSON.stringify({ error: err.message || "Internal Server Error" })
-          );
+          console.log(`Error Response:`, err);
+          res.writeHead(err.status || 500, {
+            "Content-Type": "application/json",
+          }),
+            res.end(
+              JSON.stringify({
+                status: err.status || 500,
+                message: err.message || "Internal server error",
+              })
+            );
         }
       });
   }
@@ -115,7 +112,7 @@ const authHandler = (req, res) => {
       })
       .catch((err) => {
         if (!res.writableEnded) {
-          res.writeHead(err.status || 500);
+          res.writeHead(err.message || 500);
           res.end(
             JSON.stringify({ error: err.message || "Internal Server Error" })
           );
