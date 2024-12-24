@@ -3,18 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Main Page</title>
+    <title>Home</title>
+    <link rel="stylesheet" href="../css/style.css" />
   </head>
   <body>
-    <header>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="404.html">Error</a></li>
-      </ul>
-    </header>
-    <h1>Hello World!</h1>
+    <div id="registerSection">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Register</button>
+      </form>
+      <p id="registerResponseMessage"></p>
+    </div>
+
+    <div id="loginSection">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" required />
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Password"
+          required />
+        <button type="submit">Login</button>
+      </form>
+      <p id="loginResponseMessage"></p>
+    </div>
+
+    <div id="logoutSection">
+      <button id="logoutButton">Logout</button>
+      <p id="logoutResponseMessage"></p>
+    </div>
+
+    <script src="../js/script.js"></script>
   </body>
 </html>
