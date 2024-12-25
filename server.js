@@ -1,8 +1,8 @@
-const http = require("http");
-const dotenv = require("dotenv");
-const connectDB = require("./config/db");
-const authHandler = require("./routes/auth");
-const cors = require("cors");
+import http from "http";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import authHandler from "./routes/authHeandler.js";
+import cors from "cors";
 
 // Load environment variables
 dotenv.config();
