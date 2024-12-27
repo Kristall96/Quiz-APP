@@ -2,42 +2,47 @@ import http from "http";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authHandler from "./routes/authHeandler.js";
-import cors from "cors";
+import {
+  getAllUsers,
+  updateUserRole,
+  deleteUser,
+} from "./routes/adminUpdates.js";
 
-// Load environment variables
 dotenv.config();
-
-// Connect to the database
 connectDB();
 
-// Configure CORS middleware
-const corsMiddleware = cors({
-  origin: "http://127.0.0.1:5500", // Your frontend origin
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Include Authorization header
-});
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "http://127.0.0.1:5500", // Your frontend origin
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
 
-// Create HTTP server
-const server = http.createServer((req, res) => {
-  // Handle CORS preflight requests
+const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
-    res.writeHead(204, {
-      "Access-Control-Allow-Origin": "http://127.0.0.1:5500", // Your frontend origin
-      "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    });
+    res.writeHead(204, corsHeaders);
     return res.end();
   }
 
-  // Apply CORS middleware for other requests
-  corsMiddleware(req, res, () => {
-    // Route the request to the appropriate handler
-    authHandler(req, res);
+  Object.entries(corsHeaders).forEach(([key, value]) => {
+    res.setHeader(key, value);
   });
+
+  try {
+    if (req.url.startsWith("/get-all-users") && req.method === "GET") {
+      await getAllUsers(req, res);
+    } else if (req.url.startsWith("/update-role") && req.method === "PUT") {
+      await updateUserRole(req, res);
+    } else if (req.url.startsWith("/delete-user") && req.method === "DELETE") {
+      await deleteUser(req, res);
+    } else {
+      authHandler(req, res);
+    }
+  } catch (err) {
+    res.writeHead(500, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Internal Server Error" }));
+  }
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+server.listen(process.env.PORT || 3000, () => {
+  console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
 });
