@@ -1,7 +1,8 @@
-import http from "http";
+import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-import authHandler from "./routes/authHeandler.js";
+import pageRoutes from "./routes/pageRoutes.js";
+import authRoutes from "./routes/authHeandler.js";
 import {
   getAllUsers,
   updateUserRole,
@@ -9,40 +10,45 @@ import {
 } from "./routes/adminUpdates.js";
 
 dotenv.config();
+const app = express();
 connectDB();
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "http://127.0.0.1:5500", // Your frontend origin
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+app.use(express.json());
+app.use(express.static("public"));
 
-const server = http.createServer(async (req, res) => {
+app.use((req, res, next) => {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "http://127.0.0.1:5500", // Your frontend origin
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
+
   if (req.method === "OPTIONS") {
     res.writeHead(204, corsHeaders);
     return res.end();
   }
-
   Object.entries(corsHeaders).forEach(([key, value]) => {
     res.setHeader(key, value);
   });
 
-  try {
-    if (req.url.startsWith("/get-all-users") && req.method === "GET") {
-      await getAllUsers(req, res);
-    } else if (req.url.startsWith("/update-role") && req.method === "PUT") {
-      await updateUserRole(req, res);
-    } else if (req.url.startsWith("/delete-user") && req.method === "DELETE") {
-      await deleteUser(req, res);
-    } else {
-      authHandler(req, res);
-    }
-  } catch (err) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Internal Server Error" }));
-  }
+  next();
 });
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
+app.use("/", pageRoutes);
+app.use("/auth", authRoutes);
+app.use("/admin", getAllUsers, updateUserRole, deleteUser);
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
