@@ -7,8 +7,78 @@
     <link rel="stylesheet" href="../css/style.css" />
   </head>
   <body>
-    <!-- going to make the frontend better -->
-    <!-- dada -->
+    <header>
+      <nav>
+        <div id="logo">
+          <img src="../images/quizify-removebg-preview.png" alt="" />
+        </div>
+        <div id="menu">
+          <ul>
+            <li><a href="./index.html">Home</a></li>
+            <li><a href="./about.html">About</a></li>
+            <li><a href="./contact.html">Contact</a></li>
+            <li><a href="./blog.html">Blog</a></li>
+          </ul>
+        </div>
+        <div id="leftMenu">
+          <ul>
+            <button id="Theme">Theme</button>
+            <button id="search">Search</button>
+            <li><a href="./login.html">Log in</a></li>
+            <li><a href="./register.html">Sign up for free</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    <div id="headerDiv">
+      <figcaption id="headerBGimg"></figcaption>
+
+      <!-- Left Content: Header Quiz -->
+      <div class="headerQuiz">
+        <h1 class="title gradient-text">Quiz Master</h1>
+        <h2 class="subtitle">Challenge Your Knowledge with Friends</h2>
+        <p class="description">
+          Dive into engaging quizzes and test your skills across a variety of
+          topics. Compete, learn, and have fun while improving your knowledge.
+        </p>
+        <button class="cta-button">Start Quiz Now</button>
+      </div>
+
+      <!-- Right Content: Guest Quizzes -->
+      <div class="guestQuiz">
+        <h2 class="guest-title">Guest Quizzes</h2>
+        <p class="guest-subtitle">
+          Enjoy quizzes as a guest. Sign up for more!
+        </p>
+        <div class="quiz-grid">
+          <!-- Quiz Items -->
+          <div class="quiz-item">
+            <img src="../images/quiz1.jpg" alt="Quiz 1" />
+          </div>
+          <div class="quiz-item">
+            <img src="../images/quiz2.jpg" alt="Quiz 2" />
+          </div>
+          <div class="quiz-item">
+            <img src="../images/quiz3.jpg" alt="Quiz 3" />
+          </div>
+        </div>
+        <div class="quiz-grid">
+          <div class="quiz-item">
+            <img src="../images/quiz4.jpg" alt="Quiz 4" />
+          </div>
+          <div class="quiz-item">
+            <img src="../images/quiz5.jpg" alt="Quiz 5" />
+          </div>
+          <div class="quiz-item">
+            <img src="../images/quiz6.jpg" alt="Quiz 6" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div id="leftAside">Loading...</div>
+    </aside>
     <div>
       <a href="http://127.0.0.1:5500/public/html/userPanel.html">User Panel</a>
     </div>
@@ -42,6 +112,9 @@
       <button id="logoutButton">Logout</button>
       <p id="logoutResponseMessage"></p>
     </div>
+    <footer>
+      <div id="footer"></div>
+    </footer>
 
     <script src="../js/script.js"></script>
   </body>

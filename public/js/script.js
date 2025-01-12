@@ -1,3 +1,36 @@
+document.addEventListener("DOMContentLoaded", async () => {
+  const leftAside = document.getElementById("leftAside");
+
+  try {
+    // Use the full backend URL
+    const response = await fetch("http://localhost:3000/api/rank-users");
+    if (!response.ok) {
+      throw new Error("Failed to fetch ranked users");
+    }
+
+    const rankedUsers = await response.json();
+
+    // Create a list of ranked users
+    const rankedListHTML = rankedUsers
+      .map(
+        (user) =>
+          `
+        <li class="rank-item">
+        <span class="username">${user.username}</span>
+        <span class="dash">-</span>
+        <span class="points">${user.points}</span>
+      </li>`
+      )
+      .join("");
+
+    // Insert the list into the leftAside div
+    leftAside.innerHTML = `<ul id="rankingUl"><div id="rankingH3-container"><h3 id="rankingH3"> Leaderboard </h3></div>${rankedListHTML}</ul>`;
+  } catch (err) {
+    console.error(err.message);
+    leftAside.textContent = "Failed to load rankings.";
+  }
+});
+
 const registerForm = document.getElementById("registerForm");
 const loginForm = document.getElementById("loginForm");
 const logoutButton = document.getElementById("logoutButton");

@@ -1,9 +1,12 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import express from "express";
 
-// Verify token function
+const adminRouter = express.Router();
+
+// Middleware to verify token
 const verifyToken = (req) => {
-  const authHeader = req.headers && req.headers["authorization"];
+  const authHeader = req.headers["authorization"];
   if (!authHeader) {
     throw { status: 401, message: "Unauthorized: Token is missing" };
   }
@@ -14,7 +17,7 @@ const verifyToken = (req) => {
   return jwt.verify(tokenParts[1], process.env.JWT_SECRET);
 };
 
-// Fetch all users
+// Function: Fetch all users
 const getAllUsers = async (req, res) => {
   try {
     const decodedToken = verifyToken(req);
@@ -23,15 +26,13 @@ const getAllUsers = async (req, res) => {
     }
 
     const users = await User.find({}, "-password"); // Exclude password field
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(users));
+    res.status(200).json(users);
   } catch (err) {
-    res.writeHead(err.status || 500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: err.message }));
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
-// Update user role
+// Function: Update user role
 const updateUserRole = async (req, res) => {
   try {
     const decodedToken = verifyToken(req);
@@ -39,30 +40,23 @@ const updateUserRole = async (req, res) => {
       throw { status: 403, message: "Access denied" };
     }
 
-    let body = "";
-    req.on("data", (chunk) => (body += chunk));
-    req.on("end", async () => {
-      const { userId, newRole } = JSON.parse(body);
+    const { userId, newRole } = req.body;
 
-      const user = await User.findById(userId);
-      if (!user) {
-        res.writeHead(404, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ error: "User not found" }));
-      }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-      user.role = newRole; // Update the user's role
-      await user.save();
+    user.role = newRole; // Update the user's role
+    await user.save();
 
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "User role updated successfully" }));
-    });
+    res.status(200).json({ message: "User role updated successfully" });
   } catch (err) {
-    res.writeHead(err.status || 500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: err.message }));
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
-// Delete user
+// Function: Delete user
 const deleteUser = async (req, res) => {
   try {
     const decodedToken = verifyToken(req);
@@ -70,24 +64,24 @@ const deleteUser = async (req, res) => {
       throw { status: 403, message: "Access denied" };
     }
 
-    let body = "";
-    req.on("data", (chunk) => (body += chunk));
-    req.on("end", async () => {
-      const { userId } = JSON.parse(body);
+    const { userId } = req.body;
 
-      const user = await User.findByIdAndDelete(userId);
-      if (!user) {
-        res.writeHead(404, { "Content-Type": "application/json" });
-        return res.end(JSON.stringify({ error: "User not found" }));
-      }
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "User deleted successfully" }));
-    });
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
-    res.writeHead(err.status || 500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: err.message }));
+    res.status(err.status || 500).json({ error: err.message });
   }
 };
 
+// Add functions to the router
+adminRouter.get("/get-all-users", getAllUsers);
+adminRouter.put("/update-role", updateUserRole);
+adminRouter.delete("/delete-user", deleteUser);
+
+// Export individual functions and the router
 export { getAllUsers, updateUserRole, deleteUser };
+export default adminRouter;

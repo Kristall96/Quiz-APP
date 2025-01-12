@@ -2,93 +2,81 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import dotenv from "dotenv";
+import express from "express";
 
 dotenv.config();
 
-const parseRequestBody = (req) => {
-  return new Promise((resolve, reject) => {
-    let body = "";
-    req.on("data", (chunks) => (body += chunks));
-    req.on("end", () => {
-      try {
-        resolve(JSON.parse(body));
-      } catch (err) {
-        reject({ error: err.message || "Invalid JSON" });
-      }
+const authRouter = express.Router();
+
+// Middleware to parse JSON body
+authRouter.use(express.json());
+
+// Route: Register
+authRouter.post("/register", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+
+    const existingUser = await User.findOne({
+      $or: [{ username }, { email }],
     });
-  });
-};
-
-const authHandler = async (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-  if (req.url === "/register" && req.method === "POST") {
-    try {
-      const { username, email, password } = await parseRequestBody(req);
-
-      if (!username || !email || !password) {
-        res.writeHead(400);
-        return res.end(JSON.stringify({ error: "All fields are required." }));
-      }
-
-      const existingUser = await User.findOne({
-        $or: [{ username }, { email }],
-      });
-      if (existingUser) {
-        res.writeHead(400);
-        return res.end(JSON.stringify({ error: "User already exists." }));
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new User({
-        username,
-        email,
-        password: hashedPassword,
-        role: "user",
-      });
-
-      await newUser.save();
-      res.writeHead(201);
-      res.end(JSON.stringify({ message: "User registered successfully." }));
-    } catch (err) {
-      console.error("Register Error:", err);
-      res.writeHead(500);
-      res.end(JSON.stringify({ error: "Internal Server Error" }));
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists." });
     }
-  } else if (req.url === "/login" && req.method === "POST") {
-    try {
-      const { email, password } = await parseRequestBody(req);
 
-      if (!email || !password) {
-        res.writeHead(400);
-        return res.end(
-          JSON.stringify({ error: "Email and password are required." })
-        );
-      }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      role: "user",
+      points: 0,
+    });
 
-      const user = await User.findOne({ email });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
-        res.writeHead(400);
-        return res.end(JSON.stringify({ error: "Invalid email or password." }));
-      }
-
-      const token = jwt.sign(
-        { id: user._id, role: user.role },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "1h",
-        }
-      );
-      res.writeHead(200);
-      res.end(JSON.stringify({ message: "Login successful", token }));
-    } catch (err) {
-      console.error("Login Error:", err);
-      res.writeHead(500);
-      res.end(JSON.stringify({ error: "Internal Server Error" }));
-    }
-  } else {
-    res.writeHead(404);
-    res.end(JSON.stringify({ error: "Route not found" }));
+    await newUser.save();
+    res.status(201).json({ message: "User registered successfully." });
+  } catch (err) {
+    console.error("Register Error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
 
-export default authHandler;
+// Route: Login
+authRouter.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ error: "Email and password are required." });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ error: "Invalid email or password." });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.status(200).json({ message: "Login successful", token });
+  } catch (err) {
+    console.error("Login Error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Catch-all for undefined routes
+authRouter.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+export default authRouter;

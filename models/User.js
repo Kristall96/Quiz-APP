@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   address: { type: String },
   postCode: { type: String },
   phone: { type: Number },
+  points: { type: Number },
 });
 
 const User = mongoose.model("User", userSchema);

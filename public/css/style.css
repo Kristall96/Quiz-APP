@@ -1,8 +1,270 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 20px;
-  padding: 20px;
+  margin: 0;
+  padding: 0;
   background-color: #f9f9f9;
+}
+
+header {
+  border: solid black;
+}
+nav {
+  display: flex;
+  background-color: black;
+  display: flex;
+  justify-content: space-between;
+}
+nav #logo,
+#menu,
+#leftMenu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.3vw;
+}
+nav #logo img {
+  width: 4vw;
+}
+nav #menu ul {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5vw;
+  margin: 0;
+}
+nav #menu ul li {
+  list-style-type: none;
+}
+nav #menu ul li a {
+  text-decoration: none;
+  color: white;
+}
+nav #leftMenu ul {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  gap: 1.5vw;
+  margin: 0;
+}
+
+nav ul li a:hover {
+  text-decoration: none;
+  color: rgb(108, 154, 207);
+  text-decoration: underline;
+}
+/* General Layout */
+#headerDiv {
+  position: relative;
+  display: flex; /* Flexbox layout for left and right alignment */
+  justify-content: space-between; /* Push content to the edges */
+  align-items: center; /* Vertically align content */
+  height: 50vh; /* Full viewport height */
+  padding: 0 5%; /* Padding for spacing */
+}
+
+/* Background Image */
+#headerBGimg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  background-image: url("../images/122.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1; /* Place behind content */
+}
+
+/* Header Quiz Section (Left Content) */
+.headerQuiz {
+  flex: 1; /* Take up space on the left */
+  max-width: 30%; /* Restrict width */
+  color: white;
+  text-align: left;
+}
+
+.title {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin: 0;
+  background: linear-gradient(90deg, #6a11cb, #2575fc, #43cea2, #185a9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 1.5em;
+  margin: 10px 0;
+  color: #b0bec5; /* Light gray */
+}
+
+.description {
+  font-size: 1em;
+  margin: 20px 0;
+  line-height: 1.6;
+  color: #78909c; /* Dark gray-blue */
+}
+
+.cta-button {
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  color: white;
+  font-size: 1em;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cta-button:hover {
+  background: linear-gradient(90deg, #43cea2, #185a9d);
+  transform: scale(1.1);
+}
+
+.cta-button:active {
+  transform: scale(0.95);
+}
+
+/* Guest Quizzes Section (Right Content) */
+.guestQuiz {
+  max-width: 40%; /* Restrict width */
+  color: white;
+  padding: 0;
+  text-align: center;
+}
+
+.guest-title {
+  font-size: 2.5em;
+  font-weight: bold;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #6a11cb, #2575fc, #43cea2, #185a9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.guest-subtitle {
+  font-size: 1em;
+  margin: 10px 0 20px;
+  color: #b0bec5; /* Light gray */
+}
+
+/* Quiz Grid */
+.quiz-grid {
+  display: flex;
+}
+
+.quiz-item {
+  width: 6vw;
+  height: 6vw;
+  margin: 1vw;
+  background: #2c3e50;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.quiz-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensure images cover the square */
+  display: block;
+  border: 2px solid transparent; /* Transparent border for the gradient */
+  border-radius: 10px; /* Optional rounded corners */
+  background: linear-gradient(90deg, purple, #0d47a1); /* Gradient background */
+  background-clip: padding-box; /* Clips background to the padding box */
+  -webkit-background-clip: padding-box; /* Safari support */
+  box-sizing: border-box; /* Ensures consistent sizing */
+  border-radius: 10px; /* Optional rounded corners */
+}
+
+.quiz-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(
+    90deg,
+    purple,
+    deepblue
+  ); /* Gradient for border */
+  border-radius: 10px; /* Optional rounded corners */
+}
+
+#leftAside {
+  border: solid black;
+  width: 10%;
+  height: auto;
+}
+#rankingUl {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #2c3e50;
+}
+#rankingH3 {
+  font-size: 18px; /* Adjust font size */
+  text-align: center; /* Center-align the text */
+  font-weight: bold; /* Bold for emphasis */
+  color: transparent; /* Ensure the text color is transparent */
+  margin: 0.5vw;
+
+  background-image: linear-gradient(90deg, #9841f5, #065bec);
+  -webkit-background-clip: text; /* Clip the gradient to the text */
+  -webkit-text-fill-color: transparent; /* Text transparency for gradient */
+}
+#rankingH3-container {
+  background-color: #141414;
+  margin: 0.5vw;
+  padding: 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+.rank-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px; /* Add more padding for a balanced look */
+  font-size: 14px; /* Slightly larger font size for readability */
+  background: linear-gradient(
+    90deg,
+    #141414,
+    #1c1c1c
+  ); /* Matching dark gradient background */
+  border-radius: 10px; /* Rounded corners for a modern look */
+  margin-bottom: 5px; /* Add spacing between items */
+  color: #f0f0f0; /* Light text color for contrast */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+.rank-item .username {
+  flex: 1;
+  text-align: left;
+  color: #34b3f1; /* Vibrant light blue for the username */
+}
+
+.rank-item .dash {
+  flex: 1;
+  text-align: center;
+  color: #ffffff; /* Neutral white for the dash */
+}
+
+.rank-item .points {
+  flex: 0.5;
+  text-align: right;
+  color: #ffd700; /* Gold color for points to highlight importance */
+}
+
+.rank-container {
+  max-width: 600px; /* Constrain the width for better alignment */
+  margin: 20px auto; /* Center the ranking bar on the page */
+  padding: 15px;
+  background: #1e1e1e; /* Dark container background */
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* Shadow for container depth */
 }
 
 form {
