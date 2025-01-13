@@ -8,6 +8,8 @@ import {
   deleteUser,
 } from "./routes/adminUpdates.js";
 import rankUsersRouter from "./routes/rankUser.js";
+import blogRoutes from "./routes/blogRoutes.js";
+
 import cors from "cors";
 
 dotenv.config();
@@ -17,6 +19,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api", rankUsersRouter);
+app.use("/api/blogs", blogRoutes);
+
 // Middleware for CORS
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500"); // Your frontend origin
