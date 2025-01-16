@@ -1,6 +1,6 @@
 import express from "express";
-import BlogPost from "../models/BlogPost.js"; // Import the BlogPost model
-import { authenticateUser, authorizeAdmin } from "../middleware/auth.js"; // Middleware for auth
+import BlogPost from "../models/BlogPost.js";
+import { authenticateUser, authorizeAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     const posts = await BlogPost.find({ published: true }).populate(
       "author",
       "name"
-    ); // Fetch only published posts
+    );
     res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch posts." });
@@ -24,8 +24,9 @@ router.get("/:id", async (req, res) => {
       "author",
       "name"
     );
-    if (!post || !post.published)
+    if (!post || !post.published) {
       return res.status(404).json({ error: "Post not found." });
+    }
     res.status(200).json(post);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch the post." });
@@ -58,7 +59,7 @@ router.put("/:id", authenticateUser, authorizeAdmin, async (req, res) => {
     const updatedPost = await BlogPost.findByIdAndUpdate(
       req.params.id,
       { ...req.body, updatedAt: Date.now() },
-      { new: true, runValidators: true } // Return updated post and validate fields
+      { new: true, runValidators: true }
     );
     if (!updatedPost) return res.status(404).json({ error: "Post not found." });
     res.status(200).json(updatedPost);

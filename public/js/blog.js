@@ -11,12 +11,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const posts = await response.json();
     const div = document.getElementById("mainContent");
+
     posts.forEach((post) => {
       const ul = document.createElement("ul");
+      ul.className = "post";
       ul.innerHTML = `
-        <li>${post.title}</li>
-        <li>${post.content}</li>
-        <li>${post.category}</li>
+        <li class="post-title">${post.title}</li>
+        <li class="post-image">
+          <a href="singlePost.html?id=${post._id}">
+            <img src="${post.coverImage}" alt="Cover Image for ${post.title}">
+          </a>
+        </li>
+        <li class="post-category">${post.category}</li>
       `;
       div.appendChild(ul);
     });
